@@ -1,16 +1,21 @@
-from nltk import ngrams
+from nltk.util import ngrams
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import RegexpTokenizer
 import nltk
+
 stop_words = nltk.corpus.stopwords.words('russian')
+
+
+def find_ngrams(input_list, n):
+    return zip(*[input_list[i:] for i in range(n)])
 
 
 class Document:
 
     def __init__(self, doc):
-        self.terms = None
-        self.doc_arr = None
         self.doc = doc
+        self.doc_arr = None
+        self.terms = self.get_term_list()
 
     def prepare(self):
         tokenizer = RegexpTokenizer(r'\w+')
@@ -23,18 +28,18 @@ class Document:
                 temp.append(word)
         self.doc_arr = temp
 
+
     def get_term_list(self):
         self.prepare()
+        terms = []
+        bigrams = find_ngrams(self.doc_arr, 2)
+        trigrams = find_ngrams(self.doc_arr, 3)
+        print(self.doc)
+        print(self.doc_arr)
+        for words in bigrams:
+            terms.append(words[0]+" "+words[1])
 
-        token = " "
-        token = token.join(self.doc_arr)
-        bigrams = ngrams(token, 2)
-        trigrams = ngrams(token, 3)
+        for words in trigrams:
+            terms.append(words[0]+" "+words[1]+" "+words[2])
 
-        for k1, k2 in nltk.Counter(bigrams):
-            self.terms.append(k1 + "_" + k2)
-
-        for k1, k2, k3 in nltk.Counter(trigrams):
-            self.terms.append(k1 + "_" + k2 + "_" + k3)
-
-        return self.terms
+        return terms
